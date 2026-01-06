@@ -41,6 +41,18 @@ class OpenAIClient(BaseLLMClient):
 def get_llm_client() -> BaseLLMClient:
     settings = get_settings()
     if settings.enable_openai_client and settings.openai_api_key:
-        return OpenAIClient(api_key=settings.openai_api_key)
-    return MockLLMClient()
+        try:
+            return OpenAIClient(api_key=settings.openai_api_key)
+        except ModuleNotFoundError:
+            import logging
 
+            logging.getLogger(__name__).warning(
+                "OpenAI client requested but not installed; using MockLLMClient."
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "OpenAI client unavailable (%s); using MockLLMClient.", exc
+            )
+    return MockLLMClient()

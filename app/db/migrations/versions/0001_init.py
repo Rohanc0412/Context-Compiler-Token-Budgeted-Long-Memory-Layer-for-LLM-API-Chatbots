@@ -54,7 +54,7 @@ def upgrade():
     op.create_table(
         "embeddings",
         sa.Column("chunk_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("event_chunks.chunk_id"), primary_key=True),
-        sa.Column("embedding_vector", Vector(768)),
+        sa.Column("embedding_vector", Vector()),
         sa.Column("model_name", sa.String(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
@@ -112,4 +112,3 @@ def downgrade():
     op.drop_table("event_chunks")
     op.drop_table("user_configs")
     op.drop_table("events")
-

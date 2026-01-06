@@ -31,8 +31,9 @@ except Exception:  # pragma: no cover - fallback if pgvector not installed
         impl = JSON
         cache_ok = True
 
-        def __init__(self, *args, **kwargs):
-            super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
 
 
 class Event(Base):
@@ -63,7 +64,8 @@ class EventChunk(Base):
 class Embedding(Base):
     __tablename__ = "embeddings"
     chunk_id = Column(UUID(as_uuid=True), ForeignKey("event_chunks.chunk_id"), primary_key=True)
-    embedding_vector = Column(Vector(768))
+    # Allow variable dimensions by omitting a fixed size in Vector
+    embedding_vector = Column(Vector())
     model_name = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

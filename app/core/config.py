@@ -16,12 +16,15 @@ class Settings(BaseSettings):
     context_window: int = Field(4096, env="CONTEXT_WINDOW")
     retrieval_top_k: int = Field(12, env="RETRIEVAL_TOP_K")
     summary_interval: int = Field(10, env="SUMMARY_INTERVAL")
+    summary_high_utilization: float = Field(0.9, env="SUMMARY_HIGH_UTILIZATION")
+    summary_low_utilization: float = Field(0.7, env="SUMMARY_LOW_UTILIZATION")
     tracing_enabled: bool = Field(True, env="TRACING_ENABLED")
     metrics_port: int = Field(8001, env="METRICS_PORT")
     worker_broker: str = Field("redis://redis:6379/0", env="WORKER_BROKER")
     worker_result_backend: str = Field("redis://redis:6379/1", env="WORKER_RESULT_BACKEND")
     redact_before_embedding: bool = Field(True, env="REDACT_BEFORE_EMBEDDING")
     semantic_cache_threshold: float = Field(0.92, env="SEMANTIC_CACHE_THRESHOLD")
+    embedding_model_name: str = Field("text-embedding-3-small", env="EMBEDDING_MODEL_NAME")
 
     class Config:
         env_file = ".env"
@@ -31,4 +34,3 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
-

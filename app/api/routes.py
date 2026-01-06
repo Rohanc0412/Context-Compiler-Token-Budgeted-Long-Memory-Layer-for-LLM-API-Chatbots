@@ -92,6 +92,25 @@ def chat(payload: schemas.ChatRequest, db: Session = Depends(get_db)):
         with record_step("compile"):
             compiled_prompt, trace = compiler.compile(db, compiler_input)
 
+        # Token utilization-driven summary trigger with hysteresis
+        budget = payload.input_budget_tokens or settings.input_token_budget
+        utilization = trace.total_input_tokens / float(budget)
+        prev_trace = (
+            db.query(models.PromptTrace)
+            .filter(
+                models.PromptTrace.user_id == payload.user_id,
+                models.PromptTrace.session_id == payload.session_id,
+            )
+            .order_by(models.PromptTrace.created_at.desc())
+            .offset(1)
+            .first()
+        )
+        prev_util = None
+        if prev_trace:
+            prev_util = prev_trace.total_input_tokens / float(budget)
+        if utilization > settings.summary_high_utilization and (prev_util is None or prev_util < settings.summary_low_utilization):
+            summary = summary_service.generate_summary(db, payload.user_id, payload.session_id)
+
         with record_step("llm_call"):
             assistant_response = llm_client.chat(compiled_prompt, payload.max_output_tokens or settings.max_output_tokens)
 
