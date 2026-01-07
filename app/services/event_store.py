@@ -8,7 +8,7 @@ from app.core.telemetry import record_step
 from app.db import models
 from app.services.compiler import WhitespaceTokenCounter
 from app.services.embedding import get_embedding_provider
-from app.services.memory_extractor import extract_and_store_memories
+from app.services.memory_pipeline import MemoryPipeline
 
 EMAIL_RE = re.compile(r"[\\w\\.]+@[\\w\\.]+")
 PHONE_RE = re.compile(r"\\+?\\d[\\d\\-]{7,}\\d")
@@ -19,6 +19,7 @@ class EventStore:
         self.settings = get_settings()
         self.embedder = get_embedding_provider()
         self.token_counter = WhitespaceTokenCounter()
+        self.memory_pipeline = MemoryPipeline()
 
     def is_memory_enabled(self, db: Session, user_id: str) -> bool:
         cfg = db.get(models.UserConfig, user_id)
@@ -98,5 +99,6 @@ class EventStore:
         with record_step("chunk_and_embed"):
             self.chunk_and_embed(db, event, enable_memory=memory_enabled)
         with record_step("memory_extraction"):
-            extract_and_store_memories(db, event, enabled=memory_enabled)
+            if memory_enabled:
+                self.memory_pipeline.run(db, event)
         return event

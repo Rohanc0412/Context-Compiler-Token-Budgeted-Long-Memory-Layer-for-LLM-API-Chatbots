@@ -1,0 +1,35 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Environment files
+.env
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Build / logs
+*.log
+dist/
+build/
+
+# Python packaging
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# Coverage / test artifacts
+.coverage
+.pytest_cache/
+
+# Alembic
+alembic.ini.bak
